@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.couryah.firebase_chat">
+
+    <application>
+        <activity
+            android:name=".MainChatActivity"
+            android:exported="false" />
+    </application>
+
+</manifest>
