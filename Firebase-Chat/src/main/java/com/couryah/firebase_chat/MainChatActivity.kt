@@ -5,12 +5,16 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import java.util.*
+import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.Timestamp
 
 class MainChatActivity : AppCompatActivity() {
 
     private lateinit var messageEditText: EditText
+    private lateinit var chatRecyclerView: RecyclerView
+
     private lateinit var customerId: String
     private lateinit var shopperId: String
     private var isShopper = false
@@ -20,7 +24,9 @@ class MainChatActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main_chat)
         getDataFromIntent()
         messageEditText = findViewById(R.id.send_edit_text)
+        chatRecyclerView = findViewById(R.id.chat_recyclerview)
         initSendButton()
+        loadMessages()
     }
 
     private fun getDataFromIntent() {
@@ -28,6 +34,19 @@ class MainChatActivity : AppCompatActivity() {
             customerId = intent.getStringExtra(CUSTOMER_ID)!!
             shopperId = intent.getStringExtra(SHOPPER_ID)!!
             isShopper = intent.getBooleanExtra(IS_SHOPPER, false)
+        }
+    }
+
+    private fun loadMessages() {
+        FirebaseRepository().getMessages("$customerId-$shopperId") { chatList, error ->
+            if (error == null) {
+                val chatAdapter = ChatAdapter(if (isShopper) shopperId else customerId)
+                chatRecyclerView.adapter = chatAdapter
+                chatList?.reverse()
+                chatAdapter.updateChatList(chatList!!)
+            } else {
+                Toast.makeText(this, error, Toast.LENGTH_LONG).show()
+            }
         }
     }
 
@@ -41,14 +60,15 @@ class MainChatActivity : AppCompatActivity() {
     private fun sendMessage() {
         if (messageEditText.text.isNotEmpty()) {
             FirebaseRepository().sendMessage(createMessage(), "$customerId-$shopperId")
+            messageEditText.setText("")
         }
     }
 
     private fun createMessage(): ChatModel {
         return if (isShopper) {
-            ChatModel(shopperId, customerId, messageEditText.text.toString(), Date())
+            ChatModel(shopperId, customerId, messageEditText.text.toString(), Timestamp.now())
         } else {
-            ChatModel(customerId, shopperId, messageEditText.text.toString(), Date())
+            ChatModel(customerId, shopperId, messageEditText.text.toString(), Timestamp.now())
         }
     }
 

@@ -1,6 +1,7 @@
 package com.couryah.firebase_chat
 
 import android.util.Log
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -10,7 +11,7 @@ import kotlin.collections.ArrayList
 class FirebaseRepository {
 
     private val fireStore = Firebase.firestore
-    fun getMessages(roomId: String, onFinish: (List<ChatModel>?, String?) -> Unit) {
+    fun getMessages(roomId: String, onFinish: (ArrayList<ChatModel>?, String?) -> Unit) {
         fireStore.collection(ChatConstants.ChatMessagesKey).document(roomId)
             .addSnapshotListener { snapshot, e ->
                 var contactUsMessages = arrayListOf<ChatModel>()
@@ -24,7 +25,7 @@ class FirebaseRepository {
                                 messageOb["senderId"] as String,
                                 messageOb["receiverId"] as String,
                                 messageOb["message"] as String,
-                                messageOb["time"] as Date,
+                                messageOb["time"] as Timestamp,
                             )
                         )
                     }
