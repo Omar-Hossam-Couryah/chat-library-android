@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "372395164376",
+    "project_id": "chat-library-10a38",
+    "storage_bucket": "chat-library-10a38.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:372395164376:android:10a904c310c6190bde4dad",
+        "android_client_info": {
+          "package_name": "com.couryah.chatsample"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "372395164376-4f6glg1v3m22i5nndopkhjitq9oc2soc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCQeVjG58ASYnvEmtz_qAHv4Gj6TTCqfZw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "372395164376-4f6glg1v3m22i5nndopkhjitq9oc2soc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
