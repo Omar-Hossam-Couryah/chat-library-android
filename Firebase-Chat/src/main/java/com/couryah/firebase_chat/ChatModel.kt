@@ -7,5 +7,10 @@ class ChatModel(
     @Expose var senderId: String,
     @Expose var receiverId: String,
     @Expose var message: String,
-    @Expose var time: Timestamp
-)
+    @Expose var time: Timestamp,
+    @Expose var type: String
+) {
+    enum class MessageType {
+        TEXT, IMAGE
+    }
+}

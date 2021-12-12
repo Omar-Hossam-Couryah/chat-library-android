@@ -53,22 +53,26 @@ class MainChatActivity : AppCompatActivity() {
     private fun initSendButton() {
         val sendButton = findViewById<ImageButton>(R.id.send_button)
         sendButton.setOnClickListener {
-            sendMessage()
+            sendTextMessage()
         }
     }
 
-    private fun sendMessage() {
+    private fun sendTextMessage() {
         if (messageEditText.text.isNotEmpty()) {
-            FirebaseRepository().sendMessage(createMessage(), "$customerId-$shopperId")
+            FirebaseRepository().sendMessage(createMessage(messageEditText.text.toString(), ChatModel.MessageType.TEXT.name), "$customerId-$shopperId")
             messageEditText.setText("")
         }
     }
 
-    private fun createMessage(): ChatModel {
+    private fun sendImageMessage() {
+        FirebaseRepository().sendMessage(createMessage("", ChatModel.MessageType.IMAGE.name), "$customerId-$shopperId")
+    }
+
+    private fun createMessage(text: String, messageType: String): ChatModel {
         return if (isShopper) {
-            ChatModel(shopperId, customerId, messageEditText.text.toString(), Timestamp.now())
+            ChatModel(shopperId, customerId, text, Timestamp.now(), messageType)
         } else {
-            ChatModel(customerId, shopperId, messageEditText.text.toString(), Timestamp.now())
+            ChatModel(customerId, shopperId, text, Timestamp.now(), messageType)
         }
     }
 

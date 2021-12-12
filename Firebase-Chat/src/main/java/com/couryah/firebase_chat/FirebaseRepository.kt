@@ -26,6 +26,7 @@ class FirebaseRepository {
                                 messageOb["receiverId"] as String,
                                 messageOb["message"] as String,
                                 messageOb["time"] as Timestamp,
+                                messageOb["type"] as String
                             )
                         )
                     }
