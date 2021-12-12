@@ -1,16 +1,20 @@
 package com.couryah.firebase_chat
 
+import android.net.Uri
 import android.util.Log
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
 import java.util.*
 import kotlin.collections.ArrayList
 
 class FirebaseRepository {
 
     private val fireStore = Firebase.firestore
+    private val fireStorage = FirebaseStorage.getInstance().reference
+
     fun getMessages(roomId: String, onFinish: (ArrayList<ChatModel>?, String?) -> Unit) {
         fireStore.collection(ChatConstants.ChatMessagesKey).document(roomId)
             .addSnapshotListener { snapshot, e ->
@@ -45,6 +49,22 @@ class FirebaseRepository {
                 val docData = hashMapOf(ChatConstants.ChatMessagesKey to messages)
                 Firebase.firestore.collection(ChatConstants.ChatMessagesKey)
                     .document(roomId).set(docData)
+            }
+    }
+
+    fun saveImage(
+        id: String,
+        uri: Uri,
+        onFinish: (String?, String?) -> Unit
+    ) {
+        val fileReference = fireStorage.child("ChatImages").child("$id.jpg")
+        fileReference.putFile(uri).addOnSuccessListener {
+            fileReference.downloadUrl.addOnSuccessListener {
+                onFinish(it.toString(), null)
+            }
+        }
+            .addOnFailureListener {
+                onFinish(null, it.localizedMessage)
             }
     }
 }
