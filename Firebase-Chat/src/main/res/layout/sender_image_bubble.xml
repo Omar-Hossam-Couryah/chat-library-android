@@ -12,7 +12,7 @@
         android:layout_height="128dp"
         android:layout_alignParentEnd="true"
         android:background="@drawable/sender_rounded"
-        android:padding="@dimen/standard_margin"
+        android:scaleType="centerCrop"
         tools:text="This is a sender message" />
 
     <TextView
