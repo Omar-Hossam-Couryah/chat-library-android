@@ -49,10 +49,10 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/chat_recyclerview"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_above="@id/send_container"
-        android:layout_alignParentTop="true"
         android:padding="@dimen/standard_margin"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:reverseLayout="true" />
+        app:stackFromEnd="true" />
+
 </RelativeLayout>

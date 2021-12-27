@@ -5,8 +5,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.bumptech.glide.Glide
+import com.google.android.material.progressindicator.CircularProgressIndicator
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -16,10 +19,10 @@ class ChatAdapter(private val senderId: String) : RecyclerView.Adapter<RecyclerV
     private var chatList = ArrayList<ChatModel>()
 
     open class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        var timeTextView: TextView = itemView.findViewById(R.id.time_textview)
-        private var simpleDateFormat = SimpleDateFormat("h:m a", Locale.getDefault())
+        private var timeTextView: TextView = itemView.findViewById(R.id.time_textview)
+        private var simpleDateFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
 
-        open fun bind(chatModel: ChatModel) {
+        open fun bind(chatModel: ChatModel, senderId: String) {
             timeTextView.text = simpleDateFormat.format(chatModel.time.toDate())
         }
     }
@@ -27,18 +30,35 @@ class ChatAdapter(private val senderId: String) : RecyclerView.Adapter<RecyclerV
     class TextViewHolder(itemView: View) : ChatViewHolder(itemView) {
         private var chatTextView: TextView = itemView.findViewById(R.id.chat_bubble)
 
-        override fun bind(chatModel: ChatModel) {
-            super.bind(chatModel)
+        override fun bind(chatModel: ChatModel, senderId: String) {
+            super.bind(chatModel, senderId)
             chatTextView.text = chatModel.message
         }
     }
 
     class ImageViewHolder(itemView: View) : ChatViewHolder(itemView) {
-        var chatImageView: ImageView = itemView.findViewById(R.id.chat_image)
+        private var chatImageView: ImageView = itemView.findViewById(R.id.chat_image)
+        private var progressBar: CircularProgressIndicator = itemView.findViewById(R.id.progress_bar)
 
-        override fun bind(chatModel: ChatModel) {
-            super.bind(chatModel)
-            Glide.with(itemView.context).load(chatModel.message).into(chatImageView)
+        override fun bind(chatModel: ChatModel, senderId: String) {
+            super.bind(chatModel, senderId)
+
+            val circularProgressDrawable = CircularProgressDrawable(itemView.context)
+            circularProgressDrawable.strokeWidth = 5f
+            circularProgressDrawable.centerRadius = 30f
+            circularProgressDrawable.start()
+
+            if (chatModel.uri != null && chatModel.senderId == senderId) {
+                Glide.with(itemView.context).load(chatModel.uri).placeholder(circularProgressDrawable).into(chatImageView)
+            } else {
+                Glide.with(itemView.context).load(chatModel.message).placeholder(circularProgressDrawable).into(chatImageView)
+            }
+            if (chatModel.progress >= 100) {
+                progressBar.isVisible = false
+            } else {
+                progressBar.isVisible = true
+                progressBar.progress = chatModel.progress.toInt()
+            }
         }
     }
 
@@ -79,12 +99,24 @@ class ChatAdapter(private val senderId: String) : RecyclerView.Adapter<RecyclerV
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val chatModel = chatList[position]
         val viewHolder = holder as ChatViewHolder
-        viewHolder.bind(chatModel)
+        viewHolder.bind(chatModel, senderId)
     }
 
     fun updateChatList(chatList: ArrayList<ChatModel>) {
         this.chatList = chatList
         notifyDataSetChanged()
+    }
+
+    fun addDummyChatMessage(chatModel: ChatModel) {
+        chatList.add(chatModel)
+        notifyItemInserted(0)
+    }
+
+    fun updateProgress(chatModel: ChatModel) {
+        val index = chatList.indexOf(chatModel)
+        if (index > 0 && index < chatList.size) {
+            notifyItemChanged(index)
+        }
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -96,7 +128,7 @@ class ChatAdapter(private val senderId: String) : RecyclerView.Adapter<RecyclerV
                 SENDER_IMAGE_VIEW_TYPE
             }
         } else {
-            if (chatModel.type == ChatModel.MessageType.IMAGE.name) {
+            if (chatModel.type == ChatModel.MessageType.TEXT.name) {
                 RECEIVER_CHAT_VIEW_TYPE
             } else {
                 RECEIVER_IMAGE_VIEW_TYPE

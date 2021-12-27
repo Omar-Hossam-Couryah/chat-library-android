@@ -55,10 +55,13 @@ class FirebaseRepository {
     fun saveImage(
         id: String,
         uri: Uri,
+        onProgress: (Double) -> Unit,
         onFinish: (String?, String?) -> Unit
     ) {
         val fileReference = fireStorage.child("ChatImages").child("$id.jpg")
-        fileReference.putFile(uri).addOnSuccessListener {
+        fileReference.putFile(uri).addOnProgressListener {
+            onProgress((it.bytesTransferred * 100.0) / it.totalByteCount)
+        }.addOnSuccessListener {
             fileReference.downloadUrl.addOnSuccessListener {
                 onFinish(it.toString(), null)
             }

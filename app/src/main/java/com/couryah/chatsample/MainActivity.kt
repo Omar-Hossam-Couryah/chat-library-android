@@ -11,13 +11,18 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         FirebaseApp.initializeApp(this)
-        val button = findViewById<Button>(R.id.open_button)
-        button.setOnClickListener {
-            startChat()
+        val customerButton = findViewById<Button>(R.id.customer_button)
+        customerButton.setOnClickListener {
+            startChat(false)
+        }
+
+        val shopperButton = findViewById<Button>(R.id.shopper_button)
+        shopperButton.setOnClickListener {
+            startChat(true)
         }
     }
 
-    private fun startChat() {
-        MainChatActivity.openChat(this, "CustomerId0101010101010", "ShopperId01010101010101", false)
+    private fun startChat(isShopper: Boolean) {
+        MainChatActivity.openChat(this, "CustomerId0101010101010", "ShopperId01010101010101", isShopper)
     }
 }

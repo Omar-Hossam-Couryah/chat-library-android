@@ -8,16 +8,20 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.contract.ActivityResultContracts.GetContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.Timestamp
-import java.io.FileNotFoundException
 import java.util.*
+
 
 class MainChatActivity : AppCompatActivity() {
 
@@ -30,14 +34,46 @@ class MainChatActivity : AppCompatActivity() {
 
     private var imageUri: Uri? = null
 
+    private lateinit var chatAdapter: ChatAdapter
+
+    private lateinit var takePicture: ActivityResultLauncher<Uri>
+    private lateinit var getImageFromGallery: ActivityResultLauncher<String>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_chat)
         getDataFromIntent()
+        initializeViews()
+        initButtons()
+        registerActivities()
+        loadMessages()
+    }
+
+    private fun registerActivities() {
+        takePicture =
+            registerForActivityResult(ActivityResultContracts.TakePicture()) { success: Boolean ->
+                if (success) {
+                    // The image was saved into the given Uri -> do something with it
+                    uploadImage()
+                }
+            }
+
+        getImageFromGallery = registerForActivityResult(GetContent()) { uri ->
+            imageUri = uri
+            uploadImage()
+        }
+    }
+
+    private fun initializeViews() {
         messageEditText = findViewById(R.id.send_edit_text)
         chatRecyclerView = findViewById(R.id.chat_recyclerview)
-        initButtons()
-        loadMessages()
+        chatRecyclerView.addOnLayoutChangeListener { _, _, _, _, bottom, _, _, _, oldBottom ->
+
+            if (bottom < oldBottom) {
+                scrollToStart()
+            }
+        }
+        chatRecyclerView.adapter = chatAdapter
     }
 
     private fun getDataFromIntent() {
@@ -45,16 +81,15 @@ class MainChatActivity : AppCompatActivity() {
             customerId = intent.getStringExtra(CUSTOMER_ID)!!
             shopperId = intent.getStringExtra(SHOPPER_ID)!!
             isShopper = intent.getBooleanExtra(IS_SHOPPER, false)
+            chatAdapter = ChatAdapter(if (isShopper) shopperId else customerId)
         }
     }
 
     private fun loadMessages() {
         FirebaseRepository().getMessages("$customerId-$shopperId") { chatList, error ->
             if (error == null) {
-                val chatAdapter = ChatAdapter(if (isShopper) shopperId else customerId)
-                chatRecyclerView.adapter = chatAdapter
-                chatList?.reverse()
                 chatAdapter.updateChatList(chatList!!)
+                scrollToStart()
             } else {
                 Toast.makeText(this, error, Toast.LENGTH_LONG).show()
             }
@@ -75,29 +110,46 @@ class MainChatActivity : AppCompatActivity() {
 
     private fun sendTextMessage() {
         if (messageEditText.text.isNotEmpty()) {
+            val chatMessage = createMessage(
+                messageEditText.text.toString(),
+                ChatModel.MessageType.TEXT.name, null
+            )
+            chatAdapter.addDummyChatMessage(chatMessage)
+            scrollToStart()
             FirebaseRepository().sendMessage(
-                createMessage(
-                    messageEditText.text.toString(),
-                    ChatModel.MessageType.TEXT.name
-                ), "$customerId-$shopperId"
+                chatMessage, "$customerId-$shopperId"
             )
             messageEditText.setText("")
         }
     }
 
-    private fun sendImageMessage(imageLink: String) {
+    private fun scrollToStart() {
+        chatRecyclerView.postDelayed({
+            with(chatRecyclerView) {
+                if (chatAdapter.itemCount > 0) {
+                    Log.d("Scrolling", "Smooth Scroll: ${chatAdapter.itemCount - 1}")
+                    smoothScrollToPosition(
+                        chatAdapter.itemCount - 1
+                    )
+                }
+            }
+        }, 100)
+    }
+
+    private fun sendImageMessage(message: ChatModel) {
         FirebaseRepository().sendMessage(
-            createMessage(imageLink, ChatModel.MessageType.IMAGE.name),
+            message,
             "$customerId-$shopperId"
         )
     }
 
-    private fun createMessage(text: String, messageType: String): ChatModel {
-        return if (isShopper) {
-            ChatModel(shopperId, customerId, text, Timestamp.now(), messageType)
+    private fun createMessage(text: String, messageType: String, imageUri: String?): ChatModel {
+        val chatModel = if (isShopper) {
+            ChatModel(shopperId, customerId, text, Timestamp.now(), messageType, uri = imageUri)
         } else {
-            ChatModel(customerId, shopperId, text, Timestamp.now(), messageType)
+            ChatModel(customerId, shopperId, text, Timestamp.now(), messageType, uri = imageUri)
         }
+        return chatModel
     }
 
     private fun onImageSourceClicked() {
@@ -106,9 +158,8 @@ class MainChatActivity : AppCompatActivity() {
             if (openCamera) {
                 openCamera()
             } else {
-                val photoPickerIntent = Intent(Intent.ACTION_PICK)
-                photoPickerIntent.type = "image/*"
-                startActivityForResult(photoPickerIntent, ChatConstants.GalleryRequestCode)
+                imageUri = null
+                getImageFromGallery.launch("image/*")
             }
         }
     }
@@ -136,40 +187,27 @@ class MainChatActivity : AppCompatActivity() {
             imageUri = contentResolver.insert(
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values
             )
-            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-            intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri)
-            startActivityForResult(intent, ChatConstants.CameraRequestCode)
+            takePicture.launch(imageUri)
         }
     }
 
     private fun uploadImage() {
-        FirebaseRepository().saveImage("$customerId-$shopperId-${Date()}", imageUri!!) { downloadLink, error ->
+        val message = createMessage("", ChatModel.MessageType.IMAGE.name, imageUri.toString())
+        chatAdapter.addDummyChatMessage(message)
+        scrollToStart()
+        FirebaseRepository().saveImage(
+            "$customerId-$shopperId-${Date()}",
+            imageUri!!
+        , {
+                message.progress = it
+                chatAdapter.updateProgress(message)
+            }) { downloadLink, error ->
             if (error == null) {
-                sendImageMessage(downloadLink!!)
+                message.message = downloadLink!!
+                sendImageMessage(message)
             } else {
                 Toast.makeText(this, error, Toast.LENGTH_LONG).show()
             }
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == RESULT_OK) {
-            if (requestCode == ChatConstants.GalleryRequestCode) {
-                try {
-                    imageUri = data?.data
-//                    val imageStream: InputStream? =
-//                        this.contentResolver.openInputStream(viewModel.selectedImage.value!!)
-//                    val selectedImage = BitmapFactory.decodeStream(imageStream)
-//                    mBinding.gameImageView.setImageBitmap(selectedImage)
-                } catch (e: FileNotFoundException) {
-                    e.printStackTrace()
-                    Toast.makeText(this, "Something went wrong", Toast.LENGTH_LONG).show()
-                }
-            } else if (requestCode == ChatConstants.CameraRequestCode) {
-
-            }
-            uploadImage()
         }
     }
 
@@ -181,8 +219,7 @@ class MainChatActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == ChatConstants.CameraPermissionCode) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-                val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                startActivityForResult(cameraIntent, ChatConstants.CameraRequestCode)
+                openCamera()
             } else {
                 Toast.makeText(this, "camera permission denied", Toast.LENGTH_LONG).show()
             }
