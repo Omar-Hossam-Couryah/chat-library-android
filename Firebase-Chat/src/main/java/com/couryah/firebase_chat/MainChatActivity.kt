@@ -9,10 +9,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
-import android.widget.EditText
-import android.widget.ImageButton
-import android.widget.LinearLayout
-import android.widget.Toast
+import android.widget.*
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.GetContent
@@ -21,6 +18,8 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
+import com.couryah.firebase_chat.models.ChatModel
+import com.couryah.firebase_chat.models.ChatUserModel
 import com.google.firebase.Timestamp
 import java.util.*
 
@@ -30,9 +29,9 @@ class MainChatActivity : AppCompatActivity() {
     private lateinit var messageEditText: EditText
     private lateinit var chatRecyclerView: RecyclerView
 
-    private lateinit var customerId: String
-    private lateinit var shopperId: String
-    private var isShopper = false
+    private lateinit var user1: ChatUserModel
+    private lateinit var user2: ChatUserModel
+    private lateinit var orderId: String
 
     private var imageUri: Uri? = null
 
@@ -76,19 +75,22 @@ class MainChatActivity : AppCompatActivity() {
             }
         }
         chatRecyclerView.adapter = chatAdapter
+
+        val screenTitle = findViewById<TextView>(R.id.screen_title)
+        screenTitle.text = getString(R.string.order_no, orderId)
     }
 
     private fun getDataFromIntent() {
         if (intent.hasExtra(CUSTOMER_ID)) {
-            customerId = intent.getStringExtra(CUSTOMER_ID)!!
-            shopperId = intent.getStringExtra(SHOPPER_ID)!!
-            isShopper = intent.getBooleanExtra(IS_SHOPPER, false)
-            chatAdapter = ChatAdapter(if (isShopper) shopperId else customerId)
+            user1 = (intent.getSerializableExtra(CUSTOMER_ID) as ChatUserModel?)!!
+            user2 = (intent.getSerializableExtra(SHOPPER_ID) as ChatUserModel?)!!
+            orderId = intent.getStringExtra(ORDER_ID)!!
+            chatAdapter = ChatAdapter(if (user2.isSender) user2.id else user1.id)
         }
     }
 
     private fun loadMessages() {
-        FirebaseRepository().getMessages("$customerId-$shopperId") { chatList, error ->
+        FirebaseRepository().getMessages(orderId) { chatList, error ->
             if (error == null) {
                 val noChatView = findViewById<LinearLayout>(R.id.no_chat_container)
                 noChatView.isVisible = chatList?.isEmpty()!!
@@ -125,7 +127,7 @@ class MainChatActivity : AppCompatActivity() {
             chatAdapter.addDummyChatMessage(chatMessage)
             scrollToStart()
             FirebaseRepository().sendMessage(
-                chatMessage, "$customerId-$shopperId"
+                chatMessage, orderId
             )
             messageEditText.setText("")
         }
@@ -147,15 +149,15 @@ class MainChatActivity : AppCompatActivity() {
     private fun sendImageMessage(message: ChatModel) {
         FirebaseRepository().sendMessage(
             message,
-            "$customerId-$shopperId"
+            orderId
         )
     }
 
     private fun createMessage(text: String, messageType: String, imageUri: String?): ChatModel {
-        val chatModel = if (isShopper) {
-            ChatModel(shopperId, customerId, text, Timestamp.now(), messageType, uri = imageUri)
+        val chatModel = if (user2.isSender) {
+            ChatModel(user2.id, user1.id, text, Timestamp.now(), messageType, uri = imageUri)
         } else {
-            ChatModel(customerId, shopperId, text, Timestamp.now(), messageType, uri = imageUri)
+            ChatModel(user1.id, user2.id, text, Timestamp.now(), messageType, uri = imageUri)
         }
         return chatModel
     }
@@ -204,7 +206,7 @@ class MainChatActivity : AppCompatActivity() {
         chatAdapter.addDummyChatMessage(message)
         scrollToStart()
         FirebaseRepository().saveImage(
-            "$customerId-$shopperId-${Date()}",
+            "$orderId-${Date()}",
             imageUri!!, {
                 message.progress = it
                 chatAdapter.updateProgress(message)
@@ -234,15 +236,15 @@ class MainChatActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val CUSTOMER_ID = "CustomerId"
-        private const val SHOPPER_ID = "shopperId"
-        private const val IS_SHOPPER = "isShopper"
+        private const val CUSTOMER_ID = "Customer"
+        private const val SHOPPER_ID = "Shopper"
+        private const val ORDER_ID = "order_id"
 
-        fun openChat(context: Context, customerId: String, shopperId: String, isShopper: Boolean) {
+        fun openChat(context: Context, user1: ChatUserModel, user2: ChatUserModel, orderId: String) {
             val intent = Intent(context, MainChatActivity::class.java)
-            intent.putExtra(CUSTOMER_ID, customerId)
-            intent.putExtra(SHOPPER_ID, shopperId)
-            intent.putExtra(IS_SHOPPER, isShopper)
+            intent.putExtra(CUSTOMER_ID, user1)
+            intent.putExtra(SHOPPER_ID, user2)
+            intent.putExtra(ORDER_ID, orderId)
             context.startActivity(intent)
         }
     }

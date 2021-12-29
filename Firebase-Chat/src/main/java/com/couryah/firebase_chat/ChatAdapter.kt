@@ -9,6 +9,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.bumptech.glide.Glide
+import com.couryah.firebase_chat.models.ChatModel
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import java.text.SimpleDateFormat
 import java.util.*
@@ -38,7 +39,8 @@ class ChatAdapter(private val senderId: String) : RecyclerView.Adapter<RecyclerV
 
     class ImageViewHolder(itemView: View) : ChatViewHolder(itemView) {
         private var chatImageView: ImageView = itemView.findViewById(R.id.chat_image)
-        private var progressBar: CircularProgressIndicator = itemView.findViewById(R.id.progress_bar)
+        private var progressBar: CircularProgressIndicator =
+            itemView.findViewById(R.id.progress_bar)
 
         override fun bind(chatModel: ChatModel, senderId: String) {
             super.bind(chatModel, senderId)
@@ -49,9 +51,11 @@ class ChatAdapter(private val senderId: String) : RecyclerView.Adapter<RecyclerV
             circularProgressDrawable.start()
 
             if (chatModel.uri != null && chatModel.senderId == senderId) {
-                Glide.with(itemView.context).load(chatModel.uri).placeholder(circularProgressDrawable).into(chatImageView)
+                Glide.with(itemView.context).load(chatModel.uri)
+                    .placeholder(circularProgressDrawable).into(chatImageView)
             } else {
-                Glide.with(itemView.context).load(chatModel.message).placeholder(circularProgressDrawable).into(chatImageView)
+                Glide.with(itemView.context).load(chatModel.message)
+                    .placeholder(circularProgressDrawable).into(chatImageView)
             }
             if (chatModel.progress >= 100) {
                 progressBar.isVisible = false
@@ -109,7 +113,7 @@ class ChatAdapter(private val senderId: String) : RecyclerView.Adapter<RecyclerV
 
     fun addDummyChatMessage(chatModel: ChatModel) {
         chatList.add(chatModel)
-        notifyItemInserted(0)
+        notifyItemInserted(chatList.size - 1)
     }
 
     fun updateProgress(chatModel: ChatModel) {

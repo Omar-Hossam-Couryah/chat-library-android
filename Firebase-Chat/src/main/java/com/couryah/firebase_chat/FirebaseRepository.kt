@@ -2,6 +2,7 @@ package com.couryah.firebase_chat
 
 import android.net.Uri
 import android.util.Log
+import com.couryah.firebase_chat.models.ChatModel
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.firestore
@@ -30,7 +31,8 @@ class FirebaseRepository {
                                 messageOb["receiverId"] as String,
                                 messageOb["message"] as String,
                                 messageOb["time"] as Timestamp,
-                                messageOb["type"] as String
+                                messageOb["type"] as String,
+                                uri = messageOb["uri"] as String?
                             )
                         )
                     }

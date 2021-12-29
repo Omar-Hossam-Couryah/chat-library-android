@@ -1,4 +1,4 @@
-package com.couryah.firebase_chat
+package com.couryah.firebase_chat.models
 
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.IgnoreExtraProperties
@@ -12,7 +12,7 @@ class ChatModel(
     @Expose var time: Timestamp,
     @Expose var type: String,
     var progress: Double = 0.0,
-    var uri: String? = null
+    @Expose var uri: String? = null
 ) {
     enum class MessageType {
         TEXT, IMAGE
