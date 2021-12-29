@@ -1,4 +1,4 @@
-package com.couryah.firebase_chat
+package com.couryah.firebase_chat.activities
 
 import android.Manifest
 import android.content.ContentValues
@@ -18,6 +18,10 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
+import com.couryah.firebase_chat.*
+import com.couryah.firebase_chat.ChatConstants.CUSTOMER_ID
+import com.couryah.firebase_chat.ChatConstants.ORDER_ID
+import com.couryah.firebase_chat.ChatConstants.SHOPPER_ID
 import com.couryah.firebase_chat.models.ChatModel
 import com.couryah.firebase_chat.models.ChatUserModel
 import com.google.firebase.Timestamp
@@ -85,7 +89,9 @@ class MainChatActivity : AppCompatActivity() {
             user1 = (intent.getSerializableExtra(CUSTOMER_ID) as ChatUserModel?)!!
             user2 = (intent.getSerializableExtra(SHOPPER_ID) as ChatUserModel?)!!
             orderId = intent.getStringExtra(ORDER_ID)!!
-            chatAdapter = ChatAdapter(applicationContext, if (user2.isSender) user2.id else user1.id)
+            chatAdapter = ChatAdapter(applicationContext, if (user2.isSender) user2.id else user1.id) {
+                ImageActivity.open(this, orderId, it)
+            }
         }
     }
 
@@ -236,9 +242,6 @@ class MainChatActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val CUSTOMER_ID = "Customer"
-        private const val SHOPPER_ID = "Shopper"
-        private const val ORDER_ID = "order_id"
 
         fun openChat(context: Context, user1: ChatUserModel, user2: ChatUserModel, orderId: String) {
             val intent = Intent(context, MainChatActivity::class.java)

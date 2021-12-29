@@ -3,7 +3,7 @@ package com.couryah.chatsample
 import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
-import com.couryah.firebase_chat.MainChatActivity
+import com.couryah.firebase_chat.activities.MainChatActivity
 import com.couryah.firebase_chat.models.ChatUserModel
 import com.google.firebase.FirebaseApp
 

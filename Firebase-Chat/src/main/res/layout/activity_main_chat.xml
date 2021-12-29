@@ -4,49 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainChatActivity">
-
-    <RelativeLayout
-        android:id="@+id/top_bar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingVertical="@dimen/standard_margin">
-
-        <ImageButton
-            android:id="@+id/back_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="22dp"
-            android:background="@android:color/transparent"
-            android:padding="@dimen/standard_margin"
-            android:src="@drawable/back" />
-
-        <ImageButton
-            android:id="@+id/invisible_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="22dp"
-            android:background="@android:color/transparent"
-            android:padding="@dimen/standard_margin"
-            android:src="@drawable/back"
-            android:visibility="invisible" />
-
-        <TextView
-            android:id="@+id/screen_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:layout_toStartOf="@id/invisible_button"
-            android:layout_toEndOf="@id/back_button"
-            android:gravity="center"
-            android:textColor="#242424"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            tools:text="Order No #212121" />
-    </RelativeLayout>
+    tools:context=".activities.MainChatActivity">
 
     <RelativeLayout
         android:id="@+id/send_container"
@@ -126,5 +84,7 @@
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:stackFromEnd="true" />
     </RelativeLayout>
+
+    <include layout="@layout/top_bar" />
 
 </RelativeLayout>
