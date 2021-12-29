@@ -1,5 +1,6 @@
 package com.couryah.firebase_chat
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,7 +16,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
-class ChatAdapter(private val senderId: String) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class ChatAdapter(private val applicationContext: Context, private val senderId: String) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private var chatList = ArrayList<ChatModel>()
 
@@ -23,7 +24,7 @@ class ChatAdapter(private val senderId: String) : RecyclerView.Adapter<RecyclerV
         private var timeTextView: TextView = itemView.findViewById(R.id.time_textview)
         private var simpleDateFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
 
-        open fun bind(chatModel: ChatModel, senderId: String) {
+        open fun bind(applicationContext: Context, chatModel: ChatModel, senderId: String) {
             timeTextView.text = simpleDateFormat.format(chatModel.time.toDate())
         }
     }
@@ -31,8 +32,8 @@ class ChatAdapter(private val senderId: String) : RecyclerView.Adapter<RecyclerV
     class TextViewHolder(itemView: View) : ChatViewHolder(itemView) {
         private var chatTextView: TextView = itemView.findViewById(R.id.chat_bubble)
 
-        override fun bind(chatModel: ChatModel, senderId: String) {
-            super.bind(chatModel, senderId)
+        override fun bind(applicationContext: Context, chatModel: ChatModel, senderId: String) {
+            super.bind(applicationContext, chatModel, senderId)
             chatTextView.text = chatModel.message
         }
     }
@@ -42,8 +43,8 @@ class ChatAdapter(private val senderId: String) : RecyclerView.Adapter<RecyclerV
         private var progressBar: CircularProgressIndicator =
             itemView.findViewById(R.id.progress_bar)
 
-        override fun bind(chatModel: ChatModel, senderId: String) {
-            super.bind(chatModel, senderId)
+        override fun bind(applicationContext: Context, chatModel: ChatModel, senderId: String) {
+            super.bind(applicationContext, chatModel, senderId)
 
             val circularProgressDrawable = CircularProgressDrawable(itemView.context)
             circularProgressDrawable.strokeWidth = 5f
@@ -51,10 +52,10 @@ class ChatAdapter(private val senderId: String) : RecyclerView.Adapter<RecyclerV
             circularProgressDrawable.start()
 
             if (chatModel.uri != null && chatModel.senderId == senderId) {
-                Glide.with(itemView.context).load(chatModel.uri)
+                Glide.with(applicationContext).load(chatModel.uri)
                     .placeholder(circularProgressDrawable).into(chatImageView)
             } else {
-                Glide.with(itemView.context).load(chatModel.message)
+                Glide.with(applicationContext).load(chatModel.message)
                     .placeholder(circularProgressDrawable).into(chatImageView)
             }
             if (chatModel.progress >= 100) {
@@ -103,7 +104,7 @@ class ChatAdapter(private val senderId: String) : RecyclerView.Adapter<RecyclerV
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val chatModel = chatList[position]
         val viewHolder = holder as ChatViewHolder
-        viewHolder.bind(chatModel, senderId)
+        viewHolder.bind(applicationContext, chatModel, senderId)
     }
 
     fun updateChatList(chatList: ArrayList<ChatModel>) {

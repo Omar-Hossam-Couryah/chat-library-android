@@ -85,7 +85,7 @@ class MainChatActivity : AppCompatActivity() {
             user1 = (intent.getSerializableExtra(CUSTOMER_ID) as ChatUserModel?)!!
             user2 = (intent.getSerializableExtra(SHOPPER_ID) as ChatUserModel?)!!
             orderId = intent.getStringExtra(ORDER_ID)!!
-            chatAdapter = ChatAdapter(if (user2.isSender) user2.id else user1.id)
+            chatAdapter = ChatAdapter(applicationContext, if (user2.isSender) user2.id else user1.id)
         }
     }
 
