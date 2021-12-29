@@ -2,24 +2,39 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:layout_marginEnd="48dp"
-    android:padding="@dimen/half_margin"
-    android:layout_height="wrap_content">
+    android:padding="@dimen/half_margin">
 
-    <TextView
-        android:id="@+id/chat_bubble"
-        android:background="@drawable/receiver_rounded"
+    <RelativeLayout
+        android:id="@+id/bubble_container"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/standard_margin"
-        android:textSize="16sp"
-        tools:text="This is a receiver message" />
+        android:layout_height="wrap_content">
+
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:src="@drawable/polygon_left" />
+
+        <TextView
+            android:id="@+id/chat_bubble"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/standard_margin"
+            android:background="@drawable/receiver_rounded"
+            android:paddingHorizontal="@dimen/standard_margin"
+            android:paddingVertical="@dimen/double_margin"
+            android:textSize="16sp"
+            tools:text="This is a receiver message" />
+    </RelativeLayout>
 
     <TextView
         android:id="@+id/time_textview"
         android:layout_width="wrap_content"
-        android:textSize="10sp"
         android:layout_height="wrap_content"
-        android:layout_below="@id/chat_bubble"
-        tools:text="5:30 PM"/>
+        android:layout_below="@id/bubble_container"
+        android:textSize="10sp"
+        tools:text="5:30 PM" />
 </RelativeLayout>
