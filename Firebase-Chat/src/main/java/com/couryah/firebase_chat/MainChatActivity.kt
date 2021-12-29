@@ -11,6 +11,7 @@ import android.provider.MediaStore
 import android.util.Log
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -18,6 +19,7 @@ import androidx.activity.result.contract.ActivityResultContracts.GetContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.Timestamp
 import java.util.*
@@ -88,7 +90,9 @@ class MainChatActivity : AppCompatActivity() {
     private fun loadMessages() {
         FirebaseRepository().getMessages("$customerId-$shopperId") { chatList, error ->
             if (error == null) {
-                chatAdapter.updateChatList(chatList!!)
+                val noChatView = findViewById<LinearLayout>(R.id.no_chat_container)
+                noChatView.isVisible = chatList?.isEmpty()!!
+                chatAdapter.updateChatList(chatList)
                 scrollToStart()
             } else {
                 Toast.makeText(this, error, Toast.LENGTH_LONG).show()
@@ -103,9 +107,13 @@ class MainChatActivity : AppCompatActivity() {
         }
 
         val imageButton = findViewById<ImageButton>(R.id.image_button)
+        imageButton.setColorFilter(ContextCompat.getColor(this, R.color.chat_primary))
         imageButton.setOnClickListener {
             onImageSourceClicked()
         }
+
+        val backButton = findViewById<ImageButton>(R.id.back_button)
+        backButton.setOnClickListener { finish() }
     }
 
     private fun sendTextMessage() {
@@ -197,8 +205,7 @@ class MainChatActivity : AppCompatActivity() {
         scrollToStart()
         FirebaseRepository().saveImage(
             "$customerId-$shopperId-${Date()}",
-            imageUri!!
-        , {
+            imageUri!!, {
                 message.progress = it
                 chatAdapter.updateProgress(message)
             }) { downloadLink, error ->

@@ -13,6 +13,8 @@
         android:layout_alignParentEnd="true"
         android:background="@drawable/sender_rounded"
         android:padding="@dimen/standard_margin"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
         tools:text="This is a sender message" />
 
     <TextView
@@ -21,5 +23,6 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/chat_bubble"
         android:layout_alignParentEnd="true"
+        android:textSize="10sp"
         tools:text="5:30 PM" />
 </RelativeLayout>

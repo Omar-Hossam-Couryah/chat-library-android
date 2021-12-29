@@ -5,5 +5,5 @@
         android:bottomRightRadius="12dp"
         android:topLeftRadius="12dp"
         android:topRightRadius="0dp"/>
-    <solid android:color="#ccc" />
+    <solid android:color="@color/chat_primary" />
 </shape>
