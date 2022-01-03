@@ -98,14 +98,30 @@ class MainChatActivity : AppCompatActivity() {
     private fun loadMessages() {
         FirebaseRepository().getMessages(orderId) { chatList, error ->
             if (error == null) {
-                val noChatView = findViewById<LinearLayout>(R.id.no_chat_container)
-                noChatView.isVisible = chatList?.isEmpty()!!
+                hideNoMessagesLayout(chatList?.isEmpty()!!)
                 chatAdapter.updateChatList(chatList)
+                setMessagesAsSeen(chatList)
                 scrollToStart()
             } else {
                 Toast.makeText(this, error, Toast.LENGTH_LONG).show()
             }
         }
+    }
+
+    private fun hideNoMessagesLayout(show: Boolean) {
+        val noChatView = findViewById<LinearLayout>(R.id.no_chat_container)
+        noChatView.isVisible = show
+    }
+
+    private fun setMessagesAsSeen(chatList: List<ChatModel>) {
+        for (chatModel in chatList) {
+            val senderId = if (user1.isSender) user1.id else user2.id
+            if (chatModel.senderId != senderId && !chatModel.hasBeenSeen()) {
+                chatModel.messageStatus = ChatModel.MessageStatus.RECEIVED.name
+            }
+        }
+
+        FirebaseRepository().updateSeenStatus(chatList, orderId)
     }
 
     private fun initButtons() {
@@ -132,6 +148,7 @@ class MainChatActivity : AppCompatActivity() {
             )
             chatAdapter.addDummyChatMessage(chatMessage)
             scrollToStart()
+            hideNoMessagesLayout(false)
             FirebaseRepository().sendMessage(
                 chatMessage, orderId
             )
@@ -160,12 +177,9 @@ class MainChatActivity : AppCompatActivity() {
     }
 
     private fun createMessage(text: String, messageType: String, imageUri: String?): ChatModel {
-        val chatModel = if (user2.isSender) {
-            ChatModel(user2.id, user1.id, text, Timestamp.now(), messageType, uri = imageUri)
-        } else {
-            ChatModel(user1.id, user2.id, text, Timestamp.now(), messageType, uri = imageUri)
-        }
-        return chatModel
+        val senderId = if (user2.isSender) user2.id else user1.id
+        val receiverId = if (user2.isSender) user1.id else user2.id
+        return ChatModel(senderId, receiverId, text, Timestamp.now(), messageType, uri = imageUri)
     }
 
     private fun onImageSourceClicked() {

@@ -10,31 +10,60 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.bumptech.glide.Glide
-import com.couryah.firebase_chat.activities.ImageActivity
 import com.couryah.firebase_chat.models.ChatModel
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
-class ChatAdapter(private val applicationContext: Context, private val senderId: String,
-                    private val onImageClicked: (String) -> Unit) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class ChatAdapter(
+    private val applicationContext: Context, private val senderId: String,
+    private val onImageClicked: (String) -> Unit
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private var chatList = ArrayList<ChatModel>()
 
     open class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private var timeTextView: TextView = itemView.findViewById(R.id.time_textview)
         private var simpleDateFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
+        private var statusImageview: ImageView? =
+            itemView.findViewById(R.id.message_status_imageview)
 
-        open fun bind(applicationContext: Context, chatModel: ChatModel, senderId: String, onImageClicked: (String) -> Unit) {
+        open fun bind(
+            applicationContext: Context,
+            chatModel: ChatModel,
+            senderId: String,
+            onImageClicked: (String) -> Unit
+        ) {
             timeTextView.text = simpleDateFormat.format(chatModel.time.toDate())
+
+            if (chatModel.senderId == senderId) {
+                when {
+                    chatModel.hasBeenSent() -> {
+                        statusImageview?.isVisible = true
+                        statusImageview?.setImageResource(R.drawable.outline_done_24)
+                    }
+                    chatModel.hasBeenSeen() -> {
+                        statusImageview?.isVisible = true
+                        statusImageview?.setImageResource(R.drawable.outline_done_all_24)
+                    }
+                    else -> {
+                        statusImageview?.isVisible = false
+                    }
+                }
+            }
         }
     }
 
     class TextViewHolder(itemView: View) : ChatViewHolder(itemView) {
         private var chatTextView: TextView = itemView.findViewById(R.id.chat_bubble)
 
-        override fun bind(applicationContext: Context, chatModel: ChatModel, senderId: String, onImageClicked: (String) -> Unit) {
+        override fun bind(
+            applicationContext: Context,
+            chatModel: ChatModel,
+            senderId: String,
+            onImageClicked: (String) -> Unit
+        ) {
             super.bind(applicationContext, chatModel, senderId, onImageClicked)
             chatTextView.text = chatModel.message
         }
@@ -42,7 +71,12 @@ class ChatAdapter(private val applicationContext: Context, private val senderId:
 
     class ImageViewHolder(itemView: View) : ChatViewHolder(itemView) {
         private var chatImageView: ImageView = itemView.findViewById(R.id.chat_image)
-        override fun bind(applicationContext: Context, chatModel: ChatModel, senderId: String, onImageClicked: (String) -> Unit) {
+        override fun bind(
+            applicationContext: Context,
+            chatModel: ChatModel,
+            senderId: String,
+            onImageClicked: (String) -> Unit
+        ) {
             super.bind(applicationContext, chatModel, senderId, onImageClicked)
 
             val circularProgressDrawable = CircularProgressDrawable(itemView.context)

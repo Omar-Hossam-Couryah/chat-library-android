@@ -35,6 +35,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/bubble_container"
+        android:textColor="#484848"
         android:textSize="10sp"
         tools:text="5:30 PM" />
 </RelativeLayout>

@@ -12,10 +12,15 @@ class ChatModel(
     @Expose var time: Timestamp,
     @Expose var type: String,
     var progress: Double = 0.0,
-    @Expose var uri: String? = null
+    @Expose var uri: String? = null,
+    @Expose var messageStatus: String? = MessageStatus.NOT_SENT.name
 ) {
     enum class MessageType {
         TEXT, IMAGE
+    }
+
+    enum class MessageStatus {
+        NOT_SENT, SENT, RECEIVED
     }
 
     override fun equals(other: Any?): Boolean {
@@ -24,5 +29,13 @@ class ChatModel(
 
     override fun hashCode(): Int {
         return super.hashCode()
+    }
+
+    fun hasBeenSeen(): Boolean {
+        return messageStatus == MessageStatus.RECEIVED.name
+    }
+
+    fun hasBeenSent(): Boolean {
+        return messageStatus == MessageStatus.SENT.name
     }
 }

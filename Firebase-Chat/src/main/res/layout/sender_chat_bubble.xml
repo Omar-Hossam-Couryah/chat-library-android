@@ -6,6 +6,30 @@
     android:layout_marginStart="48dp"
     android:padding="@dimen/half_margin">
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:gravity="center"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/bubble_container"
+        android:layout_alignParentEnd="true">
+
+        <TextView
+            android:id="@+id/time_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#484848"
+            android:textSize="10sp"
+            tools:text="5:30 PM" />
+
+        <ImageView
+            android:id="@+id/message_status_imageview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/standard_margin"
+            tools:src="@drawable/outline_done_24" />
+
+    </LinearLayout>
+
     <RelativeLayout
         android:id="@+id/bubble_container"
         android:layout_width="wrap_content"
@@ -32,13 +56,4 @@
             android:textSize="16sp"
             tools:text="This is a sender message" />
     </RelativeLayout>
-
-    <TextView
-        android:id="@+id/time_textview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/bubble_container"
-        android:layout_alignParentEnd="true"
-        android:textSize="10sp"
-        tools:text="5:30 PM" />
 </RelativeLayout>

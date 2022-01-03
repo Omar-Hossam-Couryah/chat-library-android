@@ -32,7 +32,8 @@ class FirebaseRepository {
                                 messageOb["message"] as String,
                                 messageOb["time"] as Timestamp,
                                 messageOb["type"] as String,
-                                uri = messageOb["uri"] as String?
+                                uri = messageOb["uri"] as String?,
+                                messageStatus = messageOb["messageStatus"] as String?
                             )
                         )
                     }
@@ -43,6 +44,7 @@ class FirebaseRepository {
     }
 
     fun sendMessage(chatModel: ChatModel, roomId: String) {
+        chatModel.messageStatus = ChatModel.MessageStatus.SENT.name
         fireStore.collection(ChatConstants.ChatMessagesKey)
             .document(roomId)
             .update(ChatConstants.ChatMessagesKey, FieldValue.arrayUnion(chatModel))
@@ -52,6 +54,11 @@ class FirebaseRepository {
                 Firebase.firestore.collection(ChatConstants.ChatMessagesKey)
                     .document(roomId).set(docData)
             }
+    }
+
+    fun updateSeenStatus(chatList: List<ChatModel>, roomId: String) {
+        fireStore.collection(ChatConstants.ChatMessagesKey).document(roomId)
+            .update(ChatConstants.ChatMessagesKey, chatList)
     }
 
     fun saveImage(
