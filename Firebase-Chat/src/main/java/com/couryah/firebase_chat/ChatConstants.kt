@@ -13,4 +13,15 @@ object ChatConstants {
     const val SHOPPER_ID = "Shopper"
     const val ORDER_ID = "order_id"
     const val IMAGE_LINK = "image_link"
+
+    // Firebase Keys
+    const val SENDER_ID = "senderId"
+    const val RECEIVER_ID = "receiverId"
+    const val MESSAGE = "message"
+    const val TIME = "time"
+    const val TYPE = "type"
+    const val URI = "uri"
+    const val MESSAGE_STATUS = "messageStatus"
+    const val CHAT_IMAGES = "ChatImages"
+    const val REPLACEMENT_CHAT = "ReplacementChat"
 }

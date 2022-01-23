@@ -114,14 +114,16 @@ class MainChatActivity : AppCompatActivity() {
     }
 
     private fun setMessagesAsSeen(chatList: List<ChatModel>) {
+        var messagesToUpdate = arrayListOf<ChatModel>()
         for (chatModel in chatList) {
             val senderId = if (user1.isSender) user1.id else user2.id
             if (chatModel.senderId != senderId && !chatModel.hasBeenSeen()) {
                 chatModel.messageStatus = ChatModel.MessageStatus.RECEIVED.name
+                messagesToUpdate.add(chatModel)
             }
         }
 
-        FirebaseRepository().updateSeenStatus(chatList, orderId)
+        FirebaseRepository().updateSeenStatus(messagesToUpdate, orderId)
     }
 
     private fun initButtons() {
@@ -179,7 +181,7 @@ class MainChatActivity : AppCompatActivity() {
     private fun createMessage(text: String, messageType: String, imageUri: String?): ChatModel {
         val senderId = if (user2.isSender) user2.id else user1.id
         val receiverId = if (user2.isSender) user1.id else user2.id
-        return ChatModel(senderId, receiverId, text, Timestamp.now(), messageType, uri = imageUri)
+        return ChatModel("", senderId, receiverId, text, Timestamp.now(), messageType, uri = imageUri)
     }
 
     private fun onImageSourceClicked() {
