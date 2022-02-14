@@ -64,8 +64,10 @@ class MainChatActivity : AppCompatActivity() {
             }
 
         getImageFromGallery = registerForActivityResult(GetContent()) { uri ->
-            imageUri = uri
-            uploadImage()
+            if (uri != null) {
+                imageUri = uri
+                uploadImage()
+            }
         }
     }
 
@@ -114,7 +116,7 @@ class MainChatActivity : AppCompatActivity() {
     }
 
     private fun setMessagesAsSeen(chatList: List<ChatModel>) {
-        var messagesToUpdate = arrayListOf<ChatModel>()
+        val messagesToUpdate = arrayListOf<ChatModel>()
         for (chatModel in chatList) {
             val senderId = if (user1.isSender) user1.id else user2.id
             if (chatModel.senderId != senderId && !chatModel.hasBeenSeen()) {
@@ -146,7 +148,7 @@ class MainChatActivity : AppCompatActivity() {
         if (messageEditText.text.isNotEmpty()) {
             val chatMessage = createMessage(
                 messageEditText.text.toString(),
-                ChatModel.MessageType.TEXT.name, null
+                ChatModel.MessageType.TEXT.name
             )
             chatAdapter.addDummyChatMessage(chatMessage)
             scrollToStart()
@@ -178,10 +180,10 @@ class MainChatActivity : AppCompatActivity() {
         )
     }
 
-    private fun createMessage(text: String, messageType: String, imageUri: String?): ChatModel {
+    private fun createMessage(text: String, messageType: String): ChatModel {
         val senderId = if (user2.isSender) user2.id else user1.id
         val receiverId = if (user2.isSender) user1.id else user2.id
-        return ChatModel("", senderId, receiverId, text, Timestamp.now(), messageType, uri = imageUri)
+        return ChatModel("", senderId, receiverId, text, Timestamp.now(), messageType)
     }
 
     private fun onImageSourceClicked() {
@@ -224,7 +226,7 @@ class MainChatActivity : AppCompatActivity() {
     }
 
     private fun uploadImage() {
-        val message = createMessage("", ChatModel.MessageType.IMAGE.name, imageUri.toString())
+        val message = createMessage("", ChatModel.MessageType.IMAGE.name)
         chatAdapter.addDummyChatMessage(message)
         scrollToStart()
         FirebaseRepository().saveImage(

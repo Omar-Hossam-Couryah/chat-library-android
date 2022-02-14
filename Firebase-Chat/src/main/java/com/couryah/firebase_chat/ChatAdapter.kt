@@ -84,16 +84,11 @@ class ChatAdapter(
             circularProgressDrawable.centerRadius = 30f
             circularProgressDrawable.start()
 
-            val imageLink: String = if (chatModel.uri != null && chatModel.senderId == senderId) {
-                chatModel.uri.toString()
-            } else {
-                chatModel.message
-            }
-            Glide.with(applicationContext).load(imageLink)
+            Glide.with(applicationContext).load(chatModel.message)
                 .placeholder(circularProgressDrawable).into(chatImageView)
 
             chatImageView.setOnClickListener {
-                onImageClicked(imageLink)
+                onImageClicked(chatModel.message)
             }
 
             if (chatModel.progress >= 100) {

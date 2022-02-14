@@ -29,7 +29,6 @@ class FirebaseRepository {
                                 messageOb[ChatConstants.MESSAGE] as String,
                                 messageOb[ChatConstants.TIME] as Timestamp,
                                 messageOb[ChatConstants.TYPE] as String,
-                                uri = messageOb[ChatConstants.URI] as String?,
                                 messageStatus = messageOb[ChatConstants.MESSAGE_STATUS] as String?
                             )
                         )

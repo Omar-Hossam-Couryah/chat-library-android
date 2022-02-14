@@ -14,7 +14,6 @@ class ChatModel(
     @Expose var time: Timestamp,
     @Expose var type: String,
     var progress: Double = 0.0,
-    @Expose var uri: String? = null,
     @Expose var messageStatus: String? = MessageStatus.NOT_SENT.name
 ) {
     enum class MessageType {
@@ -47,7 +46,6 @@ class ChatModel(
                         ChatConstants.MESSAGE to message,
                         ChatConstants.TIME to time,
                         ChatConstants.TYPE to type,
-                        ChatConstants.URI to uri,
                         ChatConstants.MESSAGE_STATUS to messageStatus)
     }
 }
